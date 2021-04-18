@@ -1,0 +1,249 @@
+\documentclass{beamer}
+\usepackage{graphicx}
+\graphicspath{{pictures/}}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\usepackage[utf8x]{inputenc}
+\usepackage[english,russian]{babel}
+\usetheme{Madrid}
+
+
+%Information to be included in the title page:
+\title[] %optional
+{Решение задачи классификации.}
+
+\subtitle{}
+
+\author[Лукьяненеко И. А.] % (optional, for multiple authors)
+{Лукьяненко Иван Андреевич, Б05-906}
+
+\institute[MIPT] % (optional)
+{
+  Студент МФТИ ФПМИ 2 курс
+}
+
+\date[machine learning 2021] % (optional)
+{Собеседование на кафедру ИАД.}
+
+\begin{document}
+
+\frame{\titlepage}
+\begin{frame}
+
+
+\frametitle{Постановка задачи.}
+
+\begin{itemize}
+ \item \textbf{Задача:} классификация;
+ \item \textbf{Данные:} синтетическая выборка и https://archive.ics.uci.edu/ml/datasets/Breast+Cancer;
+ \item \textbf{Используемые модели:} логистическая регрессия, нейронная сеть, градиентный бустинг;
+ \item \textbf{Структурные параметры:} состав признаков, структура модели, количество параметров модели;
+ \item \textbf{Критерии качества:} ROC AUC, PR кривая, сложность модели (ввести опеределение).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Данные: описание}
+\begin{itemize}
+ \item Выборка: https://archive.ics.uci.edu/ml/datasets/Breast+Cancer\\
+ \item Количество обьектов: 286 штук.\\
+ \item Распределение по меткам класса: 201 обьект принадлежит к одному классу, 85 к другому.
+ \item Количество признаков: 9 признаков.
+\end{itemize}
+Стоит отметить, что все признаки категориальные либо порядковые.
+\end{frame}
+
+\begin{frame}
+\frametitle{Данные: предобработка}
+Кодирование категориальных признаков c помощью:
+\begin{itemize}
+ \item One-Hot-Encoding\\
+ Вместо одного признака создаются n признаков, когда исходный признак для обьекта был равен i-ому уникальному значению, i-ый признак из новосозданных равен 1, остальные n-1 новосозданных признаков заполняются нулями.
+ \item Ordinal-Encoding\\	
+ Нумеруем уникальные значения признака, и отображаем значение признаков в отрезок $[1;n]$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Данные: предобработка категориальных признаков}
+Всего имеем 5 категориальных признаков:\\
+menopause, node-caps, breast, breast-quad, irradiat.\\
+Данные категориальные признаки мы будем кодировать с помощью One-Hot-Encoding.\\
+Корреляция признаков: breast и breast-quad.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Данные: предобработка порядковые признаки}
+Всего имеем 4 порядковых признака:\\
+age, tumor-size, inv-nodes, deg-malig.\\
+Данные категориальные признаки мы будем кодировать с помощью Ordinal-encoding\\
+Сохранение порядка.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей:}
+Будем сравнивать модели:
+\begin{itemize}
+ \item Логистическая регрессия
+ \item Градиентный бустинг
+ \item Нейронная сеть
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: логистическая регрессия}
+\begin{itemize}
+ \item Логистическая регрессия
+\end{itemize}
+Случай бинарной классификации. Метки класса $Y = \{-1, 1\}$\\
+Поиск вектора параметров $w$, такого что функция $a(x,w) : X\to Y$, где $X$ - пространство признаков.\\
+Функция потерь: $Q(w) = \sum_{i=1}^m\ln(1 + \exp(-y_i\langle x_i;w \rangle)) \rightarrow \min$\\
+Вычисление вероятности принадлежности классу: $\mathbb{P}(y|x) = \sigma(y_i\langle x_i, w\rangle)$
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Сравнение моделей: логистическая регрессия}
+Метрики качества при l2 - регуляризации:\\
+ROC-AUC score: 0.636727078891258\\
+PR-Curve:\\
+\includegraphics[scale = 0.5]{PR_log_l2.png}
+
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Сравнение моделей: логистическая регрессия}
+Метрики качества при l1 - регуляризации:\\
+ROC-AUC score: 0.6292643923240938\\
+PR-Curve:\\
+\includegraphics[scale = 0.5]{PR_log_l1.png}
+
+\end{frame}
+
+\begin{frame}
+
+\frametitle{Сравнение моделей: градиентный бустинг}
+\begin{itemize}
+ \item Градиентный бустинг.
+\end{itemize}
+Ансамблевый алгоритм из нескольких базовых алгоритмов.\\
+\begin{center}
+$a_N = \sum_{n=1}^N b_n(x)$
+\end{center}
+Каждый i-ый алгоритм корректирует ошибки предыдущих i-1 алгоритмов.
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: градиентный бустинг}
+Метрики качества при 900 базовых алгоритмов и learning$\_$rate = 0.01:\\
+ROC-AUC score: 0.6708422174840085\\
+PR-curve:\\\includegraphics[scale = 0.5]{PR_grad_900.png}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: градиентный бустинг}
+Зависимость roc$\_$auc$\_$score от количества базовых алгоритмов.\\
+\includegraphics[scale = 0.5]{estimators_vs_roc_auc_2.png}
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: градиентный бустинг}
+Зависимость roc$\_$auc$\_$score от показателя learning$\_$rate.\\
+\includegraphics[scale = 0.5]{lr_vs_roc_auc_2.png}
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: нейроннная сеть}
+\begin{itemize}
+ \item Нейронная сеть
+\end{itemize}
+В данной задаче мы будем рассматривать \textbf{нейронную сеть прямого расространения} или \textbf{многослойный перцептрон}.\\
+Цель сети прямого распотранения - апроксимировать некоторую функцию $f^*$\\
+В нашей задаче $y = f^{*}(x)$ целевая функция отображает вход $\textbf{x}$ в метку класса $y$.
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: нейроннная сеть}
+Модель с параметрами:\\
+Количество слоев: 8, количество параметров в каждом по 18, в выходном слое 1 \\
+2-ой и выходной слой с сигмоидальной функцией активации, остальные с линейными.\\
+optimizer: sgd;\\
+loss: mse;\\
+Лучший показатель AUC-ROC: 0.7513326226012793\\
+Accuracy score: 0.7684210526315789\\
+\end{frame}
+\begin{frame}
+\frametitle{Сравнение моделей: нейроннная сеть}
+PR-curve:\\\includegraphics[scale = 0.6]{PR_NN_2.png}
+\end{frame}
+\begin{frame}
+\frametitle{Сравнение моделей: сложность моделей}
+\begin{block}{Определение}
+Сложность модели - это интепретируемость модели; показатель, того насколько легко модель подается понимаю.\\
+\end{block}
+Ранжировать рассматриваемые в задаче модели можно следующим образом(чем ниже, тем сложнее):\\
+\begin{itemize}
+ \item Логистическая регрессия
+ \item Градиентный бустинг
+ \item Нейронная сеть
+\end{itemize}
+\end{frame}
+\begin{frame}
+ \frametitle{Сравнение моделей: синтетическая выборка}
+ В качестве синтетической выборки был выбран датасет сгенерированный с помощью sklearn.datasets.make$\_$classification.\\
+ В данной выборке все признаки числовые, принимают значения чисел с плавающей точкой.\\
+ Согласно документации признаки уже нормализированны и не нужно проводить нормализацию на этапе предобработки\\
+\end{frame}
+\begin{frame}
+\frametitle{Сравнение моделей: синтетическая выборка}
+Метрики качества логистической регрессии при l2 - регуляризации:\\
+ROC-AUC score: 0.8340092165898618\\
+PR-Curve:\\
+\includegraphics[scale = 0.5]{PR_s2.png}
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: синтетическая выборка}
+Метрики качества логистической регрессии при l1 - регуляризации:\\
+ROC-AUC score: 0.8340092165898618\\
+PR-Curve:\\
+\includegraphics[scale = 0.5]{PR_s.png}
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: синтетическая выборка}
+Метрики качества градиентного бустинга при 1000 базовых алгоритмов и learning$\_$rate = 0.01:\\
+ROC-AUC score: 0.8504147465437788\\
+PR-curve:\\\includegraphics[scale = 0.5]{PR_grad_s_2.png}
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: синтетическая выборка}
+Модель с параметрами:\\
+Количество слоев: 8, количество параметров в каждом по 20, в выходном слое 1 \\
+2-ой и выходной слой с сигмоидальной функцией активации, остальные с линейными.\\
+optimizer: sgd;\\
+loss: mse;\\
+Лучший показатель AUC-ROC: 0.928589861751152\\
+\end{frame}
+
+\begin{frame}
+\frametitle{Сравнение моделей: синтетическая выборка}
+PR-curve:\\\includegraphics[scale = 0.6]{PR_NN_S.png}
+\end{frame}
+
+\begin{frame} 
+\frametitle{Выводы}
+В ходе экспериментов с данными и параметрами моделей можно сделать следующие выводы:\\
+\begin{itemize}
+ \item Нейронная сеть показала лучшее качество на реальных данных и синтетических.
+ \item На синтетических данных оправдана сложность модели, в том смысле, что более сложные модели показывают лучше качество, чем более простые. 
+\end{itemize}
+\end{frame}
+
+\end{document}
